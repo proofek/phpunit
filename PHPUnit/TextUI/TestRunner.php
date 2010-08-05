@@ -263,6 +263,7 @@ class PHPUnit_TextUI_TestRunner extends PHPUnit_Runner_BaseTestRunner
         }
 
         if ((isset($arguments['coverageClover']) ||
+             isset($arguments['coverageCobertura']) ||
              isset($arguments['reportDirectory'])) &&
              extension_loaded('xdebug')) {
             $result->collectCodeCoverageInformation(TRUE);
@@ -323,6 +324,23 @@ class PHPUnit_TextUI_TestRunner extends PHPUnit_Runner_BaseTestRunner
                 $writer = new PHP_CodeCoverage_Report_Clover;
                 $writer->process(
                   $result->getCodeCoverage(), $arguments['coverageClover']
+                );
+
+                $this->printer->write("\n");
+                unset($writer);
+            }
+
+            if (isset($arguments['coverageCobertura'])) {
+                $this->printer->write(
+                  "\nWriting code coverage data to XML file, this may take " .
+                  'a moment.'
+                );
+
+                require_once 'PHP/CodeCoverage/Report/Cobertura.php';
+
+                $writer = new PHP_CodeCoverage_Report_Cobertura;
+                $writer->process(
+                  $result->getCodeCoverage(), $arguments['coverageCobertura']
                 );
 
                 $this->printer->write("\n");
@@ -624,6 +642,11 @@ class PHPUnit_TextUI_TestRunner extends PHPUnit_Runner_BaseTestRunner
                 $arguments['coverageClover'] = $loggingConfiguration['coverage-clover'];
             }
 
+            if (isset($loggingConfiguration['coverage-cobertura']) &&
+                !isset($arguments['coverageCobertura'])) {
+                $arguments['coverageCobertura'] = $loggingConfiguration['coverage-cobertura'];
+            }
+
             if (isset($loggingConfiguration['json']) &&
                 !isset($arguments['jsonLogfile'])) {
                 $arguments['jsonLogfile'] = $loggingConfiguration['json'];
@@ -697,6 +720,7 @@ class PHPUnit_TextUI_TestRunner extends PHPUnit_Runner_BaseTestRunner
             }
 
             if ((isset($arguments['coverageClover']) ||
+                isset($arguments['coverageCobertura']) ||
                 isset($arguments['reportDirectory'])) &&
                 extension_loaded('xdebug')) {
                 $coverage = PHP_CodeCoverage::getInstance();
