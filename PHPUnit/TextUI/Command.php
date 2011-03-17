@@ -108,6 +108,7 @@ class PHPUnit_TextUI_Command
       'testdox' => NULL,
       'testdox-html=' => NULL,
       'testdox-text=' => NULL,
+      'test-suffix=' => NULL,
       'no-configuration' => NULL,
       'no-globals-backup' => NULL,
       'printer=' => NULL,
@@ -142,7 +143,8 @@ class PHPUnit_TextUI_Command
         } else {
             $suite = $runner->getTest(
               $this->arguments['test'],
-              $this->arguments['testFile']
+              $this->arguments['testFile'],
+              $this->arguments['testSuffixes']
             );
         }
 
@@ -352,6 +354,13 @@ class PHPUnit_TextUI_Command
                 }
                 break;
 
+                case '--test-suffix': {
+                    $this->arguments['testSuffixes'] = explode(
+                      ',', $option[1]
+                    );
+                }
+                break;
+
                 case '--include-path': {
                     $includePath = $option[1];
                 }
@@ -534,6 +543,10 @@ class PHPUnit_TextUI_Command
                 $this->arguments['testFile'] = realpath($this->arguments['test']);
                 $this->arguments['test']     = substr($this->arguments['test'], 0, strrpos($this->arguments['test'], '.'));
             }
+        }
+
+        if (!isset($this->arguments['testSuffixes'])) {
+            $this->arguments['testSuffixes'] = array('Test.php', '.phpt');
         }
 
         if (isset($includePath)) {
@@ -905,6 +918,8 @@ Usage: phpunit [switches] UnitTest [UnitTest.php]
   --group ...               Only runs tests from the specified group(s).
   --exclude-group ...       Exclude tests from the specified group(s).
   --list-groups             List available test groups.
+  --test-suffix ...         Only search for tests in a given <directory> with
+                            specified suffix(es). Default: Test.php,.phpt
 
   --loader <loader>         TestSuiteLoader implementation to use.
   --printer <printer>       TestSuiteListener implementation to use.
